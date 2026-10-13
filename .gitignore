@@ -1,0 +1,17 @@
+# Sistema operativo
+.DS_Store
+
+# Compilação Java / Maven
+backend/fontenaria/target/
+*.class
+*.jar
+!mvnw.cmd
+
+# IDE
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+
+# Dependências (se um dia houver tooling de frontend)
+node_modules/
