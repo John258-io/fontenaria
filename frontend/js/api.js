@@ -32,7 +32,7 @@ const Auth = {
 /** Faz um pedido à API, tratando erros e sessão expirada. */
 async function api(caminho, opcoes = {}) {
     const headers = { ...(opcoes.headers || {}) };
-    if (opcoes.corpo) {
+    if (opcoes.body) {
         headers["Content-Type"] = "application/json";
     }
 
@@ -72,7 +72,7 @@ const API = {
     login(telefone, senha) {
         return api("/auth/login", {
             method: "POST",
-            corpo: JSON.stringify({ telefone, senha })
+            body: JSON.stringify({ telefone, senha })
         });
     },
     logout() {
