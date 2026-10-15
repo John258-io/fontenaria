@@ -107,3 +107,4 @@ mude as palavras-passe e remova essas classes antes de produção.)
 
 As variáveis de cor/tipo estão todas em `frontend/css/global.css` (bloco
 `:root`). Mudando esse bloco, muda o tema inteiro do sistema.
+````````````````````````````

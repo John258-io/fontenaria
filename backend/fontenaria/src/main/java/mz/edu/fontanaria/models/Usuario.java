@@ -17,7 +17,7 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 12)
     private String telefone;
 
-    // Hash BCrypt, nunca a palavra-passe em texto simples
+
     @Column(nullable = false)
     private String senha;
 

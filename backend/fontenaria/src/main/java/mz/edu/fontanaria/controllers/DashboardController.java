@@ -18,11 +18,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
 
-/**
- * GET /api/dashboard — resumo da operação para o utilizador autenticado.
- * Substitui o antigo DashboardController de Thymeleaf: em vez de devolver uma
- * página HTML, devolve JSON que o frontend desenha (ver frontend/js/dashboard.js).
- */
+
 @RestController
 @RequestMapping("/api/dashboard")
 public class DashboardController {
@@ -51,7 +47,7 @@ public class DashboardController {
         return "Boa noite";
     }
 
-    /** "18 de Junho de 2025" */
+
     private String dataActual() {
         LocalDate hoje = LocalDate.now(ZoneId.of("Africa/Maputo"));
         return hoje.getDayOfMonth() + " de " + MESES[hoje.getMonthValue() - 1] + " de " + hoje.getYear();
