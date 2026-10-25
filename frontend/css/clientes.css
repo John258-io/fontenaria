@@ -1,0 +1,4 @@
+/* ===== Página de clientes =====
+   Os estilos partilhados (barra de ferramentas, tabela, modal, estado vazio)
+   passaram para componentes.css, que esta folha importa. */
+@import url("componentes.css");

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios · Fontanária Manhiça</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/componentes.css">
+</head>
+<body>
+
+    <main class="content" id="conteudo-pagina" hidden>
+        <div class="page-head">
+            <div>
+                <h2>Relatórios</h2>
+                <p id="periodo-actual">Consumo, facturação e recebimentos por período.</p>
+            </div>
+            <div class="actions">
+                <input id="filtro-inicio" class="toolbar-filtro" type="date" aria-label="Data inicial">
+                <input id="filtro-fim" class="toolbar-filtro" type="date" aria-label="Data final">
+                <button class="btn btn-primary" id="btn-gerar" type="button">
+                    <svg class="icon"><use href="#i-chart"/></svg> Gerar
+                </button>
+            </div>
+        </div>
+
+        <p class="form-error" id="erro-lista" hidden></p>
+
+        <!-- Indicadores (preenchidos por /api/relatorios) -->
+        <section class="stats" id="stats">
+            <article class="card stat">
+                <div class="stat-icon tone-teal"><svg class="icon"><use href="#i-drop"/></svg></div>
+                <div>
+                    <p class="stat-label">Consumo medido</p>
+                    <p class="stat-value" id="s-consumo">—</p>
+                    <p class="stat-note" id="s-consumo-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-blue"><svg class="icon"><use href="#i-file"/></svg></div>
+                <div>
+                    <p class="stat-label">Facturado</p>
+                    <p class="stat-value" id="s-faturado">—</p>
+                    <p class="stat-note" id="s-faturado-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-green"><svg class="icon"><use href="#i-cash"/></svg></div>
+                <div>
+                    <p class="stat-label">Recebido</p>
+                    <p class="stat-value" id="s-recebido">—</p>
+                    <p class="stat-note" id="s-recebido-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-orange"><svg class="icon"><use href="#i-alert"/></svg></div>
+                <div>
+                    <p class="stat-label">Por receber</p>
+                    <p class="stat-value" id="s-por-receber">—</p>
+                    <p class="stat-note warn" id="s-por-receber-nota">&nbsp;</p>
+                </div>
+            </article>
+        </section>
+
+        <div class="grid-2">
+            <!-- Receita dos últimos 6 meses -->
+            <section class="card card-pad">
+                <div class="chart-head">
+                    <div>
+                        <h3 class="card-title">Facturação mensal</h3>
+                        <p class="card-sub">Últimos 6 meses, independente do período seleccionado.</p>
+                    </div>
+                </div>
+
+                <div class="chart-total">
+                    <strong id="receita-total">—</strong>
+                    <span id="receita-nota">—</span>
+                </div>
+
+                <div class="bars" id="barras"></div>
+                <div class="bar-labels" id="bar-labels"></div>
+            </section>
+
+            <!-- Clientes activos -->
+            <section class="card card-pad">
+                <h3 class="card-title">Base de clientes</h3>
+                <p class="card-sub">Clientes activos com serviço na Fontanária.</p>
+
+                <div class="chart-total">
+                    <strong id="clientes-activos">—</strong>
+                    <span>activos</span>
+                </div>
+
+                <p class="card-sub" id="clientes-nota">
+                    Os clientes suspensos não entram nas contagens do relatório.
+                </p>
+            </section>
+        </div>
+
+        <!-- Consumo por categoria -->
+        <section class="card card-pad">
+            <h3 class="card-title">Consumo e facturação por categoria</h3>
+            <p class="card-sub">Cada barra mostra o consumo medido no período seleccionado.</p>
+
+            <div class="barras-h" id="categorias"></div>
+
+            <div class="empty-state" id="vazio" hidden>
+                <div class="stat-icon tone-blue"><svg class="icon"><use href="#i-chart"/></svg></div>
+                <strong>Sem dados no período</strong>
+                <p>Alargue as datas ou registe leituras e facturas nesse intervalo.</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/layout.js"></script>
+    <script>montarLayout({ titulo: "Relatórios", caminho: "relatorios.html" });</script>
+    <script src="js/pagina.js"></script>
+    <script src="js/relatorios.js"></script>
+</body>
+</html>

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/componentes.css">
 </head>
 <body>
 
@@ -14,18 +15,144 @@
         <div class="page-head">
             <div>
                 <h2>Leituras</h2>
-                <p>Registo de leituras de contadores.</p>
+                <p>Registo de leituras de contadores e consumo mensal dos clientes.</p>
+            </div>
+            <div class="actions">
+                <button class="btn btn-primary" id="btn-novo" type="button">
+                    <svg class="icon"><use href="#i-plus"/></svg> Nova leitura
+                </button>
             </div>
         </div>
 
-        <section class="card card-pad">
-            <h3 class="card-title">Em construção</h3>
-            <p class="card-sub">
-                O registo de leituras será implementado na próxima fase do projecto.
-                Por agora, o painel <a href="dashboard.html" class="link-right">Visão geral</a> é a única
-                página com dados, servidos pela API REST do backend.
-            </p>
+        <!-- Indicadores (preenchidos por /api/leituras) -->
+        <section class="stats">
+            <article class="card stat">
+                <div class="stat-icon tone-blue"><svg class="icon"><use href="#i-file"/></svg></div>
+                <div>
+                    <p class="stat-label">Leituras registadas</p>
+                    <p class="stat-value" id="s-total">—</p>
+                    <p class="stat-note" id="s-total-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-teal"><svg class="icon"><use href="#i-calendar"/></svg></div>
+                <div>
+                    <p class="stat-label">Leituras do mês</p>
+                    <p class="stat-value" id="s-mes">—</p>
+                    <p class="stat-note" id="s-mes-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-green"><svg class="icon"><use href="#i-drop"/></svg></div>
+                <div>
+                    <p class="stat-label">Consumo do mês</p>
+                    <p class="stat-value" id="s-consumo">—</p>
+                    <p class="stat-note" id="s-consumo-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-orange"><svg class="icon"><use href="#i-alert"/></svg></div>
+                <div>
+                    <p class="stat-label">Clientes por ler</p>
+                    <p class="stat-value" id="s-por-ler">—</p>
+                    <p class="stat-note warn" id="s-por-ler-nota">&nbsp;</p>
+                </div>
+            </article>
         </section>
+
+        <!-- Lista -->
+        <section class="card card-pad">
+            <div class="table-head">
+                <h3 class="card-title">Leituras registadas</h3>
+                <div class="toolbar">
+                    <div class="input-wrap toolbar-search">
+                        <svg class="icon"><use href="#i-search"/></svg>
+                        <input id="busca" type="search" placeholder="Procurar por cliente, bairro ou contador…"
+                               aria-label="Procurar leituras">
+                    </div>
+                    <input id="filtro-periodo" class="toolbar-filtro" type="month"
+                           aria-label="Filtrar por mês">
+                </div>
+            </div>
+
+            <p class="form-success" id="aviso" hidden></p>
+            <p class="form-error" id="erro-lista" hidden></p>
+
+            <div class="table-wrap" id="tabela-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Contador</th>
+                            <th>Período</th>
+                            <th>Anterior</th>
+                            <th>Actual</th>
+                            <th>Consumo</th>
+                            <th>Data</th>
+                            <th>Factura</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="leituras-corpo"></tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" id="vazio" hidden>
+                <div class="stat-icon tone-blue"><svg class="icon"><use href="#i-file"/></svg></div>
+                <strong id="vazio-titulo">Nenhuma leitura registada</strong>
+                <p id="vazio-texto">Clique em “Nova leitura” para registar a primeira.</p>
+            </div>
+
+            <p class="card-sub lista-total" id="lista-total"></p>
+        </section>
+
+        <!-- Modal de registo/edição -->
+        <div class="modal-overlay" id="modal" hidden>
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+                <div class="modal-head">
+                    <div>
+                        <h3 id="modal-titulo">Nova leitura</h3>
+                        <p class="card-sub" id="modal-sub">O consumo é calculado automaticamente.</p>
+                    </div>
+                    <button class="alert-close" id="btn-fechar" type="button" aria-label="Fechar">
+                        <svg class="icon"><use href="#i-close"/></svg>
+                    </button>
+                </div>
+
+                <form id="form-leitura" novalidate>
+                    <p class="form-error" id="modal-erro" hidden></p>
+
+                    <div class="form-grid">
+                        <div class="field full">
+                            <label for="f-cliente">Cliente <span class="required">*</span></label>
+                            <select id="f-cliente" name="clienteId" required></select>
+                        </div>
+
+                        <div class="field">
+                            <label for="f-data">Data da leitura <span class="required">*</span></label>
+                            <input id="f-data" name="dataLeitura" type="date" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="f-valor">Leitura do contador (m³) <span class="required">*</span></label>
+                            <input id="f-valor" name="leituraActual" type="number" min="0" step="0.01" required
+                                   placeholder="Ex.: 1242">
+                        </div>
+
+                        <div class="field full">
+                            <label for="f-observacao">Observação</label>
+                            <input id="f-observacao" name="observacao" type="text" maxlength="200"
+                                   placeholder="Opcional — ex.: contador selado">
+                        </div>
+                    </div>
+
+                    <div class="modal-foot">
+                        <button class="btn" id="btn-cancelar" type="button">Cancelar</button>
+                        <button class="btn btn-primary" id="btn-guardar" type="submit">Guardar leitura</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </main>
 
     <script src="js/api.js"></script>
@@ -33,5 +160,6 @@
     <script src="js/layout.js"></script>
     <script>montarLayout({ titulo: "Leituras", caminho: "leituras.html" });</script>
     <script src="js/pagina.js"></script>
+    <script src="js/leituras.js"></script>
 </body>
 </html>

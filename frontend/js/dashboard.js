@@ -39,7 +39,7 @@ function desenharReceita(receita) {
 
     const maximo = Math.max(...receita.meses.map(m => m.valor));
     document.getElementById("barras").innerHTML = receita.meses.map(mes => `
-        <div class="bar-col${mes.mes === receita.mesActual ? " current" : ""}">
+        <div class="bar-col${mes.nome === receita.mesActual ? " current" : ""}">
             <span class="bar-value">${mes.rotulo}</span>
             <div class="bar" style="height:${Math.round(mes.valor / maximo * 100)}%"></div>
         </div>`).join("");

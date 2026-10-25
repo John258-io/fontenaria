@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/componentes.css">
 </head>
 <body>
 
@@ -14,18 +15,153 @@
         <div class="page-head">
             <div>
                 <h2>Definições</h2>
-                <p>Configuração do sistema e dos utilizadores.</p>
+                <p>Tarifas do sistema e gestão dos utilizadores (apenas administradores).</p>
             </div>
         </div>
 
-        <section class="card card-pad">
-            <h3 class="card-title">Em construção</h3>
+        <p class="form-error" id="aviso-permissoes" hidden></p>
+
+        <div class="tabs" role="tablist">
+            <button class="tab active" id="tab-parametros" type="button" role="tab"
+                    aria-selected="true">Parâmetros</button>
+            <button class="tab" id="tab-utilizadores" type="button" role="tab"
+                    aria-selected="false">Utilizadores</button>
+        </div>
+
+        <!-- ===================== Parâmetros ===================== -->
+        <section class="card card-pad" id="painel-parametros" role="tabpanel">
+            <h3 class="card-title">Tarifas e prazos</h3>
             <p class="card-sub">
-                A gestão de utilizadores e parâmetros será implementada na próxima fase do projecto.
-                Por agora, o painel <a href="dashboard.html" class="link-right">Visão geral</a> é a única
-                página com dados, servidos pela API REST do backend.
+                A tarifa por m³ é aplicada quando se emite uma factura; as facturas
+                já emitidas guardam a tarifa do momento.
             </p>
+
+            <p class="form-success" id="aviso-parametros" hidden></p>
+            <p class="form-error" id="erro-parametros" hidden></p>
+
+            <form id="form-parametros" novalidate style="margin-top:16px">
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="p-domestica">Tarifa Doméstica (MZN / m³) <span class="required">*</span></label>
+                        <input id="p-domestica" type="number" min="0" step="0.01" required placeholder="45">
+                    </div>
+                    <div class="field">
+                        <label for="p-comercial">Tarifa Comercial (MZN / m³) <span class="required">*</span></label>
+                        <input id="p-comercial" type="number" min="0" step="0.01" required placeholder="85">
+                    </div>
+                    <div class="field">
+                        <label for="p-institucional">Tarifa Institucional (MZN / m³) <span class="required">*</span></label>
+                        <input id="p-institucional" type="number" min="0" step="0.01" required placeholder="120">
+                    </div>
+                    <div class="field">
+                        <label for="p-vencimento">Vencimento (dias) <span class="required">*</span></label>
+                        <input id="p-vencimento" type="number" min="1" step="1" required placeholder="15">
+                    </div>
+                </div>
+
+                <div class="modal-foot">
+                    <button class="btn btn-primary" id="btn-guardar-parametros" type="submit">Guardar parâmetros</button>
+                </div>
+            </form>
         </section>
+
+        <!-- ===================== Utilizadores ===================== -->
+        <section class="card card-pad" id="painel-utilizadores" role="tabpanel" hidden>
+            <div class="table-head">
+                <div>
+                    <h3 class="card-title">Utilizadores do sistema</h3>
+                    <p class="card-sub">Operadores e administradores com acesso à aplicação.</p>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" id="btn-novo" type="button">
+                        <svg class="icon"><use href="#i-plus"/></svg> Novo utilizador
+                    </button>
+                </div>
+            </div>
+
+            <p class="form-success" id="aviso-usuarios" hidden></p>
+            <p class="form-error" id="erro-usuarios" hidden></p>
+
+            <div class="table-wrap" id="tabela-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Perfil</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="usuarios-corpo"></tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" id="vazio" hidden>
+                <div class="stat-icon tone-blue"><svg class="icon"><use href="#i-users"/></svg></div>
+                <strong>Nenhum utilizador</strong>
+                <p>Clique em “Novo utilizador” para criar o primeiro.</p>
+            </div>
+        </section>
+
+        <!-- Modal de registo/edição de utilizador -->
+        <div class="modal-overlay" id="modal" hidden>
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+                <div class="modal-head">
+                    <div>
+                        <h3 id="modal-titulo">Novo utilizador</h3>
+                        <p class="card-sub" id="modal-sub">A conta pode ser desactivada mais tarde.</p>
+                    </div>
+                    <button class="alert-close" id="btn-fechar" type="button" aria-label="Fechar">
+                        <svg class="icon"><use href="#i-close"/></svg>
+                    </button>
+                </div>
+
+                <form id="form-usuario" novalidate>
+                    <p class="form-error" id="modal-erro" hidden></p>
+
+                    <div class="form-grid">
+                        <div class="field full">
+                            <label for="u-nome">Nome <span class="required">*</span></label>
+                            <input id="u-nome" name="nome" type="text" maxlength="120" required
+                                   placeholder="Ex.: Ana Mucavele">
+                        </div>
+
+                        <div class="field">
+                            <label for="u-telefone">Telefone <span class="required">*</span></label>
+                            <input id="u-telefone" name="telefone" type="tel" maxlength="20" required
+                                   placeholder="84 123 4567">
+                        </div>
+
+                        <div class="field">
+                            <label for="u-perfil">Perfil</label>
+                            <select id="u-perfil" name="perfil">
+                                <option>Operador</option>
+                                <option>Administrador</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="u-senha">Palavra-passe</label>
+                            <input id="u-senha" name="senha" type="password" minlength="6"
+                                   placeholder="Mínimo 6 caracteres">
+                        </div>
+
+                        <div class="field">
+                            <label for="u-estado">Estado</label>
+                            <select id="u-estado" name="activo">
+                                <option value="true">Activo</option>
+                                <option value="false">Desactivado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-foot">
+                        <button class="btn" id="btn-cancelar" type="button">Cancelar</button>
+                        <button class="btn btn-primary" id="btn-guardar" type="submit">Guardar utilizador</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </main>
 
     <script src="js/api.js"></script>
@@ -33,5 +169,6 @@
     <script src="js/layout.js"></script>
     <script>montarLayout({ titulo: "Definições", caminho: "configuracoes.html" });</script>
     <script src="js/pagina.js"></script>
+    <script src="js/configuracoes.js"></script>
 </body>
 </html>

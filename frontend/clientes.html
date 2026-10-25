@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/clientes.css">
 </head>
 <body>
 
@@ -14,18 +15,164 @@
         <div class="page-head">
             <div>
                 <h2>Clientes</h2>
-                <p>Gestão de clientes da Fontanária Manhiça.</p>
+                <p>Registo e consulta dos clientes da Fontanária Manhiça.</p>
+            </div>
+            <div class="actions">
+                <button class="btn btn-primary" id="btn-novo" type="button">
+                    <svg class="icon"><use href="#i-plus"/></svg> Novo cliente
+                </button>
             </div>
         </div>
 
-        <section class="card card-pad">
-            <h3 class="card-title">Em construção</h3>
-            <p class="card-sub">
-                O registo e a consulta de clientes será implementado na próxima fase do projecto.
-                Por agora, o painel <a href="dashboard.html" class="link-right">Visão geral</a> é a única
-                página com dados, servidos pela API REST do backend.
-            </p>
+        <!-- Indicadores (preenchidos por /api/clientes) -->
+        <section class="stats">
+            <article class="card stat">
+                <div class="stat-icon tone-blue"><svg class="icon"><use href="#i-users"/></svg></div>
+                <div>
+                    <p class="stat-label">Total de clientes</p>
+                    <p class="stat-value" id="s-total">—</p>
+                    <p class="stat-note" id="s-total-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-green"><svg class="icon"><use href="#i-drop"/></svg></div>
+                <div>
+                    <p class="stat-label">Activos</p>
+                    <p class="stat-value" id="s-activos">—</p>
+                    <p class="stat-note" id="s-activos-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-orange"><svg class="icon"><use href="#i-alert"/></svg></div>
+                <div>
+                    <p class="stat-label">Suspensos</p>
+                    <p class="stat-value" id="s-suspensos">—</p>
+                    <p class="stat-note warn" id="s-suspensos-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-teal"><svg class="icon"><use href="#i-plus"/></svg></div>
+                <div>
+                    <p class="stat-label">Novos este mês</p>
+                    <p class="stat-value" id="s-novos">—</p>
+                    <p class="stat-note" id="s-novos-nota">&nbsp;</p>
+                </div>
+            </article>
         </section>
+
+        <!-- Lista -->
+        <section class="card card-pad">
+            <div class="table-head">
+                <h3 class="card-title">Clientes registados</h3>
+                <div class="toolbar">
+                    <div class="input-wrap toolbar-search">
+                        <svg class="icon"><use href="#i-search"/></svg>
+                        <input id="busca" type="search" placeholder="Procurar por nome, telefone, bairro ou contador…"
+                               aria-label="Procurar clientes">
+                    </div>
+                    <select id="filtro-estado" class="toolbar-filtro" aria-label="Filtrar por estado">
+                        <option value="">Todos os estados</option>
+                        <option value="Activo">Activos</option>
+                        <option value="Suspenso">Suspensos</option>
+                    </select>
+                </div>
+            </div>
+
+            <p class="form-success" id="aviso" hidden></p>
+            <p class="form-error" id="erro-lista" hidden></p>
+
+            <div class="table-wrap" id="tabela-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Bairro</th>
+                            <th>Contador</th>
+                            <th>Categoria</th>
+                            <th>Estado</th>
+                            <th>Registo</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientes-corpo"></tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" id="vazio" hidden>
+                <div class="stat-icon tone-blue"><svg class="icon"><use href="#i-users"/></svg></div>
+                <strong id="vazio-titulo">Nenhum cliente registado</strong>
+                <p id="vazio-texto">Clique em “Novo cliente” para registar o primeiro.</p>
+            </div>
+
+            <p class="card-sub lista-total" id="lista-total"></p>
+        </section>
+
+        <!-- Modal de registo/edição -->
+        <div class="modal-overlay" id="modal" hidden>
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+                <div class="modal-head">
+                    <div>
+                        <h3 id="modal-titulo">Novo cliente</h3>
+                        <p class="card-sub" id="modal-sub">Preencha os dados do cliente.</p>
+                    </div>
+                    <button class="alert-close" id="btn-fechar" type="button" aria-label="Fechar">
+                        <svg class="icon"><use href="#i-close"/></svg>
+                    </button>
+                </div>
+
+                <form id="form-cliente" novalidate>
+                    <p class="form-error" id="modal-erro" hidden></p>
+
+                    <div class="form-grid">
+                        <div class="field full">
+                            <label for="f-nome">Nome <span class="required">*</span></label>
+                            <input id="f-nome" name="nome" type="text" maxlength="120" required
+                                   placeholder="Ex.: Ana Mucavele">
+                        </div>
+
+                        <div class="field">
+                            <label for="f-telefone">Telefone <span class="required">*</span></label>
+                            <input id="f-telefone" name="telefone" type="tel" maxlength="20" required
+                                   placeholder="84 123 4567">
+                        </div>
+
+                        <div class="field">
+                            <label for="f-bairro">Bairro <span class="required">*</span></label>
+                            <input id="f-bairro" name="bairro" type="text" maxlength="80" required
+                                   placeholder="Ex.: Mahelane">
+                        </div>
+
+                        <div class="field">
+                            <label for="f-categoria">Categoria</label>
+                            <select id="f-categoria" name="categoria">
+                                <option>Doméstica</option>
+                                <option>Comercial</option>
+                                <option>Institucional</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="f-estado">Estado</label>
+                            <select id="f-estado" name="estado">
+                                <option>Activo</option>
+                                <option>Suspenso</option>
+                            </select>
+                        </div>
+
+                        <div class="field full">
+                            <label for="f-contador">Número do contador</label>
+                            <input id="f-contador" name="numeroContador" type="text" maxlength="20"
+                                   placeholder="Opcional — ex.: CT-1042">
+                        </div>
+                    </div>
+
+                    <div class="modal-foot">
+                        <button class="btn" id="btn-cancelar" type="button">Cancelar</button>
+                        <button class="btn btn-primary" id="btn-guardar" type="submit">Guardar cliente</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </main>
 
     <script src="js/api.js"></script>
@@ -33,5 +180,6 @@
     <script src="js/layout.js"></script>
     <script>montarLayout({ titulo: "Clientes", caminho: "clientes.html" });</script>
     <script src="js/pagina.js"></script>
+    <script src="js/clientes.js"></script>
 </body>
 </html>

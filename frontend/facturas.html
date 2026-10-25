@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facturação · Fontanária Manhiça</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/componentes.css">
+</head>
+<body>
+
+    <main class="content" id="conteudo-pagina" hidden>
+        <div class="page-head">
+            <div>
+                <h2>Facturação</h2>
+                <p>Facturas emitidas a partir das leituras (consumo × tarifa).</p>
+            </div>
+            <div class="actions">
+                <button class="btn" id="btn-gerar-mes" type="button">
+                    <svg class="icon"><use href="#i-calendar"/></svg> Gerar do mês
+                </button>
+                <button class="btn btn-primary" id="btn-nova" type="button">
+                    <svg class="icon"><use href="#i-plus"/></svg> Nova factura
+                </button>
+            </div>
+        </div>
+
+        <!-- Indicadores (preenchidos por /api/facturas) -->
+        <section class="stats">
+            <article class="card stat">
+                <div class="stat-icon tone-blue"><svg class="icon"><use href="#i-file"/></svg></div>
+                <div>
+                    <p class="stat-label">Facturas emitidas</p>
+                    <p class="stat-value" id="s-total">—</p>
+                    <p class="stat-note" id="s-total-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-orange"><svg class="icon"><use href="#i-alert"/></svg></div>
+                <div>
+                    <p class="stat-label">Pendentes</p>
+                    <p class="stat-value" id="s-pendentes">—</p>
+                    <p class="stat-note warn" id="s-pendentes-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-green"><svg class="icon"><use href="#i-cash"/></svg></div>
+                <div>
+                    <p class="stat-label">Pagas</p>
+                    <p class="stat-value" id="s-pagas">—</p>
+                    <p class="stat-note" id="s-pagas-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-teal"><svg class="icon"><use href="#i-chart"/></svg></div>
+                <div>
+                    <p class="stat-label">Saldo por receber</p>
+                    <p class="stat-value" id="s-saldo">—</p>
+                    <p class="stat-note" id="s-saldo-nota">&nbsp;</p>
+                </div>
+            </article>
+        </section>
+
+        <!-- Lista -->
+        <section class="card card-pad">
+            <div class="table-head">
+                <h3 class="card-title">Facturas</h3>
+                <div class="toolbar">
+                    <div class="input-wrap toolbar-search">
+                        <svg class="icon"><use href="#i-search"/></svg>
+                        <input id="busca" type="search" placeholder="Procurar por factura, cliente ou contador…"
+                               aria-label="Procurar facturas">
+                    </div>
+                    <select id="filtro-estado" class="toolbar-filtro" aria-label="Filtrar por estado">
+                        <option value="">Todos os estados</option>
+                        <option value="Pendente">Pendentes</option>
+                        <option value="Paga">Pagas</option>
+                    </select>
+                    <input id="filtro-periodo" class="toolbar-filtro" type="month" aria-label="Filtrar por mês">
+                </div>
+            </div>
+
+            <p class="form-success" id="aviso" hidden></p>
+            <p class="form-error" id="erro-lista" hidden></p>
+
+            <div class="table-wrap" id="tabela-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Factura</th>
+                            <th>Cliente</th>
+                            <th>Consumo</th>
+                            <th>Valor</th>
+                            <th>Pago</th>
+                            <th>Saldo</th>
+                            <th>Vencimento</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="facturas-corpo"></tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" id="vazio" hidden>
+                <div class="stat-icon tone-blue"><svg class="icon"><use href="#i-file"/></svg></div>
+                <strong id="vazio-titulo">Nenhuma factura emitida</strong>
+                <p id="vazio-texto">Use “Nova factura” ou “Gerar do mês” a partir das leituras.</p>
+            </div>
+
+            <p class="card-sub lista-total" id="lista-total"></p>
+        </section>
+
+        <!-- Modal: nova factura a partir de uma leitura -->
+        <div class="modal-overlay" id="modal-nova" hidden>
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="nova-titulo">
+                <div class="modal-head">
+                    <div>
+                        <h3 id="nova-titulo">Nova factura</h3>
+                        <p class="card-sub">A tarifa da categoria do cliente é aplicada automaticamente.</p>
+                    </div>
+                    <button class="alert-close" id="btn-fechar-nova" type="button" aria-label="Fechar">
+                        <svg class="icon"><use href="#i-close"/></svg>
+                    </button>
+                </div>
+
+                <form id="form-nova" novalidate>
+                    <p class="form-error" id="nova-erro" hidden></p>
+
+                    <div class="field">
+                        <label for="f-leitura">Leitura por facturar <span class="required">*</span></label>
+                        <select id="f-leitura" name="leituraId" required></select>
+                    </div>
+
+                    <div class="modal-foot">
+                        <button class="btn" id="btn-cancelar-nova" type="button">Cancelar</button>
+                        <button class="btn btn-primary" id="btn-emitir" type="submit">Emitir factura</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal: detalhe da factura -->
+        <div class="modal-overlay" id="modal-detalhe" hidden>
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detalhe-titulo">
+                <div class="modal-head">
+                    <div>
+                        <h3 id="detalhe-titulo">Factura</h3>
+                        <p class="card-sub" id="detalhe-sub">—</p>
+                    </div>
+                    <button class="alert-close" id="btn-fechar-detalhe" type="button" aria-label="Fechar">
+                        <svg class="icon"><use href="#i-close"/></svg>
+                    </button>
+                </div>
+
+                <div class="detalhe-lista" id="detalhe-lista"></div>
+                <p class="card-title" style="margin-bottom:8px">Pagamentos</p>
+                <div class="detalhe-lista" id="detalhe-pagamentos"></div>
+
+                <div class="modal-foot">
+                    <button class="btn" id="btn-eliminar-factura" type="button">Eliminar</button>
+                    <a class="btn btn-primary" id="btn-pagar-factura" href="pagamentos.html">
+                        <svg class="icon"><use href="#i-cash"/></svg> Registar pagamento
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/layout.js"></script>
+    <script>montarLayout({ titulo: "Facturação", caminho: "facturas.html" });</script>
+    <script src="js/pagina.js"></script>
+    <script src="js/facturas.js"></script>
+</body>
+</html>

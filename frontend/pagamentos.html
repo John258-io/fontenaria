@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamentos · Fontanária Manhiça</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/componentes.css">
+</head>
+<body>
+
+    <main class="content" id="conteudo-pagina" hidden>
+        <div class="page-head">
+            <div>
+                <h2>Pagamentos</h2>
+                <p>Recebimentos contra facturas pendentes (numerário e mobile money).</p>
+            </div>
+            <div class="actions">
+                <button class="btn btn-primary" id="btn-novo" type="button">
+                    <svg class="icon"><use href="#i-plus"/></svg> Registar pagamento
+                </button>
+            </div>
+        </div>
+
+        <!-- Indicadores (preenchidos por /api/pagamentos) -->
+        <section class="stats">
+            <article class="card stat">
+                <div class="stat-icon tone-green"><svg class="icon"><use href="#i-cash"/></svg></div>
+                <div>
+                    <p class="stat-label">Recebido este mês</p>
+                    <p class="stat-value" id="s-mes">—</p>
+                    <p class="stat-note" id="s-mes-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-blue"><svg class="icon"><use href="#i-chart"/></svg></div>
+                <div>
+                    <p class="stat-label">Total recebido</p>
+                    <p class="stat-value" id="s-total">—</p>
+                    <p class="stat-note" id="s-total-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-teal"><svg class="icon"><use href="#i-file"/></svg></div>
+                <div>
+                    <p class="stat-label">Pagamentos registados</p>
+                    <p class="stat-value" id="s-quantidade">—</p>
+                    <p class="stat-note" id="s-quantidade-nota">&nbsp;</p>
+                </div>
+            </article>
+            <article class="card stat">
+                <div class="stat-icon tone-orange"><svg class="icon"><use href="#i-alert"/></svg></div>
+                <div>
+                    <p class="stat-label">Por receber</p>
+                    <p class="stat-value" id="s-por-receber">—</p>
+                    <p class="stat-note warn" id="s-por-receber-nota">&nbsp;</p>
+                </div>
+            </article>
+        </section>
+
+        <!-- Lista -->
+        <section class="card card-pad">
+            <div class="table-head">
+                <h3 class="card-title">Pagamentos recebidos</h3>
+                <div class="toolbar">
+                    <div class="input-wrap toolbar-search">
+                        <svg class="icon"><use href="#i-search"/></svg>
+                        <input id="busca" type="search" placeholder="Procurar por recibo, factura ou cliente…"
+                               aria-label="Procurar pagamentos">
+                    </div>
+                    <select id="filtro-metodo" class="toolbar-filtro" aria-label="Filtrar por método">
+                        <option value="">Todos os métodos</option>
+                        <option>Numerário</option>
+                        <option>M-Pesa</option>
+                        <option>e-Mola</option>
+                        <option>Transferência</option>
+                        <option>Multicaixa</option>
+                    </select>
+                </div>
+            </div>
+
+            <p class="form-success" id="aviso" hidden></p>
+            <p class="form-error" id="erro-lista" hidden></p>
+
+            <div class="table-wrap" id="tabela-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Recibo</th>
+                            <th>Cliente</th>
+                            <th>Factura</th>
+                            <th>Valor</th>
+                            <th>Método</th>
+                            <th>Recebido por</th>
+                            <th>Quando</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="pagamentos-corpo"></tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" id="vazio" hidden>
+                <div class="stat-icon tone-green"><svg class="icon"><use href="#i-cash"/></svg></div>
+                <strong id="vazio-titulo">Nenhum pagamento registado</strong>
+                <p id="vazio-texto">Clique em “Registar pagamento” para receber a primeira factura.</p>
+            </div>
+
+            <p class="card-sub lista-total" id="lista-total"></p>
+        </section>
+
+        <!-- Modal de registo -->
+        <div class="modal-overlay" id="modal" hidden>
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+                <div class="modal-head">
+                    <div>
+                        <h3 id="modal-titulo">Registar pagamento</h3>
+                        <p class="card-sub" id="modal-sub">O pagamento é lançado contra uma factura pendente.</p>
+                    </div>
+                    <button class="alert-close" id="btn-fechar" type="button" aria-label="Fechar">
+                        <svg class="icon"><use href="#i-close"/></svg>
+                    </button>
+                </div>
+
+                <form id="form-pagamento" novalidate>
+                    <p class="form-error" id="modal-erro" hidden></p>
+
+                    <div class="form-grid">
+                        <div class="field full">
+                            <label for="f-factura">Factura pendente <span class="required">*</span></label>
+                            <select id="f-factura" name="facturaId" required></select>
+                        </div>
+
+                        <div class="field">
+                            <label for="f-valor">Valor recebido (MZN) <span class="required">*</span></label>
+                            <input id="f-valor" name="valor" type="number" min="0" step="0.01" required
+                                   placeholder="Ex.: 1240">
+                        </div>
+
+                        <div class="field">
+                            <label for="f-metodo">Método</label>
+                            <select id="f-metodo" name="metodo">
+                                <option>Numerário</option>
+                                <option>M-Pesa</option>
+                                <option>e-Mola</option>
+                                <option>Transferência</option>
+                                <option>Multicaixa</option>
+                            </select>
+                        </div>
+
+                        <div class="field full">
+                            <label for="f-observacao">Observação</label>
+                            <input id="f-observacao" name="observacao" type="text" maxlength="200"
+                                   placeholder="Opcional — ex.: pagamento parcial">
+                        </div>
+                    </div>
+
+                    <div class="modal-foot">
+                        <button class="btn" id="btn-cancelar" type="button">Cancelar</button>
+                        <button class="btn btn-primary" id="btn-guardar" type="submit">Registar pagamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/layout.js"></script>
+    <script>montarLayout({ titulo: "Pagamentos", caminho: "pagamentos.html" });</script>
+    <script src="js/pagina.js"></script>
+    <script src="js/pagamentos.js"></script>
+</body>
+</html>

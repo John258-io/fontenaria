@@ -51,6 +51,12 @@ a {
     text-decoration: none;
 }
 
+/* O atributo hidden do HTML tem de vencer qualquer display definido no CSS
+   (ex.: o display:grid da sobreposição do modal). */
+[hidden] {
+    display: none !important;
+}
+
 button,
 input {
     font: inherit;
